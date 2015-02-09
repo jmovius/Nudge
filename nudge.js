@@ -173,6 +173,7 @@ function frontPage(req, res) {
 }
 
 var server = http.createServer(frontPage);
-server.listen(8080);
+server.listen();
 var address = server.address();
 console.log("nudge is listening at http://localhost:" + address.port + "/");
+
