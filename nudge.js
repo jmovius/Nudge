@@ -6,12 +6,12 @@ var http = require("http"),
     querystring = require("querystring"),
     child_process = require("child_process");
 
-function beginPage(res) {
+function beginPage(res, title) {
     res.write("<!DOCTYPE html>\n");
     res.write("<html lang='en'>\n");
     res.write("<head>\n");
     res.write("<meta charset='utf-8'>\n");
-    res.write("<title>Nudge - Web Interface for Git Push</title>\n");
+    res.write("<title>"+ title + "</title>\n");
     res.write("</head>\n");
     res.write("<body>\n");
 }
@@ -22,11 +22,15 @@ function endPage(res) {
     res.end();
 }
 
-function writePre(res, divClass, data) {
-    var escaped = data.replace(/\</, "&lt;").
-                       replace(/\>/, "&gt;");
+function writeHeading(res, tag, title) {
+    res.write("<" + tag + ">" + title + "</" + tag + ">\n");
+}
 
-    res.write("<div class='" + divClass + "'>\n");
+function writePre(res, divClass, data) {
+    var escaped = data.replace(/</, "&lt;").
+                       replace(/>/, "&gt;");
+
+    res.write("<div class='" + divClass + "_div'>\n");
     res.write("<pre>");
     res.write(escaped);
     res.write("</pre>\n");
@@ -42,9 +46,14 @@ function endForm(res) {
     res.write("</form>\n");
 }
 
+function capitalize(str) {
+    return str[0].toUpperCase() + str.slice(1);
+}
+
 function beginSelect(res, what) {
-    res.write("<div class='" + what + "'>\n");
-    res.write("<select name='" + what + "'>\n");
+    res.write("<div class='" + what + "_div'>\n");
+    res.write("<label for='" + what + "_select'>" + capitalize(what) + "</label>\n");
+    res.write("<select id='" + what + "_select' name='" + what + "'>\n");
 }
 
 function writeOption(res, option) {
@@ -59,6 +68,7 @@ function endSelect(res) {
 function gitRemote(res) {
     child_process.exec("git remote", function(err, stdout, stderr) {
         if (err) {
+            writeHeading(res, "h2", "Error listing remotes");
             writePre(res, "error", stderr);
             endPage(res);
         } else {
@@ -83,6 +93,7 @@ function gitRemote(res) {
 function gitBranch(res) {
     child_process.exec("git branch", function(err, stdout, stderr) {
         if (err) {
+            writeHeading(res, "h2", "Error listing branches");
             writePre(res, "error", stderr);
             endPage(res);
         } else {
@@ -110,9 +121,11 @@ function gitBranch(res) {
 function gitStatus(res) {
     child_process.exec("git status", function(err, stdout, stderr) {
         if (err) {
+            writeHeading(res, "h2", "Error retrieving status");
             writePre(res, "error", stderr);
             endPage(res);
         } else {
+            writeHeading(res, "h2", "Git Status");
             writePre(res, "status", stdout);
             gitBranch(res);
         }
@@ -131,8 +144,10 @@ function gitPush(req, res) {
 
         child_process.exec("git push " + form.remote + " " + form.branch, function(err, stdout, stderr) {
             if (err) {
+                writeHeading(res, "h2", "Error pushing repository");
                 writePre(res, "error", stderr);
             } else {
+                writeHeading(res, "h2", "Git Push");
                 writePre(res, "push", stdout);
             }
             gitStatus(res);
@@ -145,7 +160,10 @@ function frontPage(req, res) {
         "Content-Type": "text/html"
     });
 
-    beginPage(res);
+    var title = "Nudge - Web Interface for Git Push";
+
+    beginPage(res, title);
+    writeHeading(res, "h1", title);
 
     if (req.method === "POST" && req.url === "/push") {
         gitPush(req, res);
@@ -155,7 +173,6 @@ function frontPage(req, res) {
 }
 
 var server = http.createServer(frontPage);
-server.listen();
+server.listen(8080);
 var address = server.address();
 console.log("nudge is listening at http://localhost:" + address.port + "/");
-
