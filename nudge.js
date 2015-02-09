@@ -23,16 +23,18 @@ function endPage(res) {
 }
 
 function writePre(res, divClass, data) {
+    var escaped = data.replace(/\</, "&lt;").
+                       replace(/\>/, "&gt;");
 
     res.write("<div class='" + divClass + "'>\n");
     res.write("<pre>");
-    res.write(data);
+    res.write(escaped);
     res.write("</pre>\n");
     res.write("</div>\n");
 }
 
 function beginForm(res) {
-    res.write("<form method='POST', action='/push'>\n");
+    res.write("<form method='POST' action='/push'>\n");
 }
 
 function endForm(res) {
