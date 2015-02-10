@@ -6,12 +6,22 @@ var http = require("http"),
     querystring = require("querystring"),
     child_process = require("child_process");
 
+function writeCSS(res) {
+    res.writeHead(200, {
+        "Content-Type": "text/css"
+    });
+
+    res.write("/* style.css - this space intentionally left blank */");
+    res.end();
+}
+
 function beginPage(res, title) {
     res.write("<!DOCTYPE html>\n");
     res.write("<html lang='en'>\n");
     res.write("<head>\n");
     res.write("<meta charset='utf-8'>\n");
     res.write("<title>"+ title + "</title>\n");
+    res.write("<link rel='stylesheet' href='style.css' type='text/css'>\n");
     res.write("</head>\n");
     res.write("<body>\n");
 }
@@ -160,15 +170,19 @@ function frontPage(req, res) {
         "Content-Type": "text/html"
     });
 
-    var title = "Nudge - Web Interface for Git Push";
-
-    beginPage(res, title);
-    writeHeading(res, "h1", title);
-
-    if (req.method === "POST" && req.url === "/push") {
-        gitPush(req, res);
+    if (req.url === "/style.css") {
+        writeCSS(res);
     } else {
-        gitStatus(res);
+        var title = "Nudge - Web Interface for Git Push";
+
+        beginPage(res, title);
+        writeHeading(res, "h1", title);
+
+        if (req.method === "POST" && req.url === "/push") {
+            gitPush(req, res);
+        } else {
+            gitStatus(res);
+        }
     }
 }
 
@@ -176,4 +190,3 @@ var server = http.createServer(frontPage);
 server.listen();
 var address = server.address();
 console.log("nudge is listening at http://localhost:" + address.port + "/");
-
