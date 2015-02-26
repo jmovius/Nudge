@@ -11,23 +11,12 @@ function writeCSS(res) {
         "Content-Type": "text/css"
     });
 
-    //res.write("/* style.css - this space intentionally left blank */");
     res.write("/* Move down content because we have a fixed navbar that is 50px tall */\n");
     res.write("body {\n\tpadding-top: 50px;\n\tpadding-bottom: 20px;\n}");
     res.end();
 }
 
 function beginPage(res, title) {
-    /*
-    res.write("<!DOCTYPE html>\n");
-    res.write("<html lang='en'>\n");
-    res.write("<head>\n");
-    res.write("<meta charset='utf-8'>\n");
-    res.write("<title>"+ title + "</title>\n");
-    res.write("<link rel='stylesheet' href='style.css' type='text/css'>\n");
-    res.write("</head>\n");
-    res.write("<body>\n");
-    /**/
     res.write("<!DOCTYPE html>\n");
     res.write("<html lang='en'>\n");
     res.write("<head>\n");
@@ -93,7 +82,6 @@ function endForm(res) {
     res.write("</div>"); // Close button column.
     res.write("</form>\n");
     res.write("</div>"); // Close row class.
-    //res.write("</div>"); // Close container class for form.
 }
 
 function capitalize(str) {
