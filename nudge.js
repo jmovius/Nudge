@@ -11,11 +11,14 @@ function writeCSS(res) {
         "Content-Type": "text/css"
     });
 
-    res.write("/* style.css - this space intentionally left blank */");
+    //res.write("/* style.css - this space intentionally left blank */");
+    res.write("/* Move down content because we have a fixed navbar that is 50px tall */\n");
+    res.write("body {\n\tpadding-top: 50px;\n\tpadding-bottom: 20px;\n}");
     res.end();
 }
 
 function beginPage(res, title) {
+    /*
     res.write("<!DOCTYPE html>\n");
     res.write("<html lang='en'>\n");
     res.write("<head>\n");
@@ -24,12 +27,44 @@ function beginPage(res, title) {
     res.write("<link rel='stylesheet' href='style.css' type='text/css'>\n");
     res.write("</head>\n");
     res.write("<body>\n");
+    /**/
+    res.write("<!DOCTYPE html>\n");
+    res.write("<html lang='en'>\n");
+    res.write("<head>\n");
+    res.write("<meta charset='utf-8'>\n");
+    res.write("<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n");
+    res.write("<meta name='viewport' content='width=device-width, initial-scale=1'>\n");
+    res.write("<meta name='description' content=''>\n");
+    res.write("<meta name='author' content=''>\n");
+    res.write("<title>"+ title + "</title>\n");
+    res.write("<link rel='stylesheet' href='style.css' type='text/css'>\n");
+    res.write("<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css' type='text/css'>\n");
+    res.write("</head>\n");
+    res.write("<body>\n");
+    writeNav(res, title);
+    res.write("<div class='jumbotron'>"); // Open Jumbotron for body.
+    res.write("<div class='container'>"); // Open container for body.
 }
 
 function endPage(res) {
+    res.write("<hr>");
+    res.write("<footer>\n");
+    res.write("<p>&copy; Nudge 2015</p>\n");
+    res.write("</footer>\n");
+    res.write("</div>"); // Close container for form and footer.
     res.write("</body>\n");
     res.write("</html>\n");
     res.end();
+}
+
+function writeNav(res, title) {
+    res.write("<nav class='navbar navbar-inverse navbar-fixed-top'>\n");
+    res.write("<div class='container'>\n");
+    res.write("<div class='navbar-header'>\n");
+    res.write("<a class='navbar-brand' href='#'>" + title + "</a>\n");
+    res.write("</div>\n");
+    res.write("</div>\n");
+    res.write("</nav>\n");
 }
 
 function writeHeading(res, tag, title) {
@@ -41,19 +76,24 @@ function writePre(res, divClass, data) {
                        replace(/>/, "&gt;");
 
     res.write("<div class='" + divClass + "_div'>\n");
-    res.write("<pre>");
+    res.write("<pre class='jumbotron'>");
     res.write(escaped);
     res.write("</pre>\n");
     res.write("</div>\n");
 }
 
 function beginForm(res) {
+    res.write("<div class='row'>\n");
     res.write("<form method='POST' action='/push'>\n");
 }
 
 function endForm(res) {
-    res.write("<input type='submit' value='Push'>\n");
+    res.write("<div class='col-md-4'>\n");
+    res.write("<input class='btn btn-primary btn-lg' type='submit' value='Push'>\n");
+    res.write("</div>"); // Close button column.
     res.write("</form>\n");
+    res.write("</div>"); // Close row class.
+    //res.write("</div>"); // Close container class for form.
 }
 
 function capitalize(str) {
@@ -85,6 +125,7 @@ function gitRemote(res) {
             var output = stdout.toString(),
                 remotes = output.split(/\n/);
 
+            res.write("<div class='col-md-4'>\n"); // Open branch column class.
             beginSelect(res, "remote");
 
             remotes.forEach(function(remoteName) {
@@ -94,6 +135,7 @@ function gitRemote(res) {
             });
 
             endSelect(res);
+            res.write("</div>\n"); // Close branch column class.
             endForm(res);
             endPage(res);
         }
@@ -110,7 +152,9 @@ function gitBranch(res) {
             var output = stdout.toString(),
                 branches = output.split(/\n/);
 
+            res.write("<div class='container'>"); // Open container for form and footer.
             beginForm(res);
+            res.write("<div class='col-md-4'>\n"); // Open branch column class.
             beginSelect(res, "branch");
 
             branches.forEach(function(branch) {
@@ -123,6 +167,7 @@ function gitBranch(res) {
             });
 
             endSelect(res);
+            res.write("</div>\n"); // Close branch column class.
             gitRemote(res);
         }
     });
@@ -137,6 +182,8 @@ function gitStatus(res) {
         } else {
             writeHeading(res, "h2", "Git Status");
             writePre(res, "status", stdout);
+            res.write("</div>"); // Close container for body.
+            res.write("</div>"); // Close jumbotron for body.
             gitBranch(res);
         }
     });
